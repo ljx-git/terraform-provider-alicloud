@@ -2,7 +2,6 @@
   // terraform 可执行程序的路径
   //"terraform":"D:\\go\\bin\\terraform.exe",
   "terraform":"/root/go/bin/terraform",
-  //"terraform":"/root/go/src/github/hashicorp/terraform/main.go",
 
   // provider-alicloud 生成的二进制名称
   //"provider-alicloud":"terraform-provider-alicloud.exe"

@@ -4,7 +4,7 @@
     {
       // 使用debug二进制文件的方式debug go代码，原理是使用delve工具把二进制文件中和源码中打上相同位置断点
       // 显示的debug名字
-      "name": "exec", 
+      "name": "debug", 
        // 执行的go指令
       "type": "go",
       // launch：启动，attach：附加

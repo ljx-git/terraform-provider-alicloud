@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aliyun/credentials-go/credentials"
 	ossclient "github.com/alibabacloud-go/alibabacloud-gateway-oss/client"
 	gatewayclient "github.com/alibabacloud-go/alibabacloud-gateway-sls/client"
 	roaCS "github.com/alibabacloud-go/cs-20151215/v5/client"
@@ -812,11 +813,23 @@ func (client *AliyunClient) NewRoaCsClient() (*roaCS.Client, error) {
 		"x-acs-secure-transport": tea.String(client.config.SecureTransport),
 	}
 	param := &openapi.GlobalParameters{Headers: header}
+
+	
+	config := new(credentials.Config).
+		SetType("oidc_role_arn").
+		SetRoleArn(client.config.RoleArn).
+		SetOIDCProviderArn(client.config.OidcProviderArn).
+		SetOIDCTokenFilePath(client.config.OidcTokenFile).
+		SetRoleSessionName("rrsa-oidc-token")
+	log.Printf("OidcTokenFileOidcTokenFile %v\n", client.config.OidcTokenFile)
+	oidcCredential, _ := credentials.NewCredential(config)
+
 	// Initialize the CS client if necessary
 	roaCSConn, err := roaCS.NewClient(&openapi.Config{
 		AccessKeyId:      tea.String(client.config.AccessKey),
 		AccessKeySecret:  tea.String(client.config.SecretKey),
 		SecurityToken:    tea.String(client.config.SecurityToken),
+		Credential:       oidcCredential,
 		RegionId:         tea.String(client.config.RegionId),
 		UserAgent:        tea.String(client.getUserAgent()),
 		Endpoint:         tea.String(endpoint),

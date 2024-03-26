@@ -39,6 +39,9 @@ type Config struct {
 	SourceIp             string
 	SecureTransport      string
 	MaxRetryTimeout      int
+	RoleArn              string
+  OidcProviderArn      string
+  OidcTokenFile        string
 
 	RamRoleArn               string
 	RamRoleSessionName       string
@@ -213,6 +216,17 @@ func (c *Config) validateRegion() error {
 }
 
 func (c *Config) getAuthCredential(stsSupported bool) auth.Credential {
+	if c.RoleArn != "" && c.OidcProviderArn != "" && c.OidcTokenFile != "" {
+		config := new(credential.Config).
+				SetType("oidc_role_arn").
+				SetRoleArn(c.RoleArn).
+				SetOIDCProviderArn(c.OidcProviderArn).
+				SetOIDCTokenFilePath(c.OidcTokenFile).
+				SetRoleSessionName("rrsa-oidc-token")
+			oidcCredential, _ := credential.NewCredential(config)
+			log.Printf("[DEBUG] Generate OIDC Credential: %v\n", oidcCredential)
+			return oidcCredential
+  }
 	if c.AccessKey != "" && c.SecretKey != "" {
 		if stsSupported && c.SecurityToken != "" {
 			return credentials.NewStsTokenCredential(c.AccessKey, c.SecretKey, c.SecurityToken)
@@ -431,6 +445,11 @@ func (c *Config) getCredentialConfig(stsSupported bool) *credential.Config {
 	} else if c.EcsRoleName != "" {
 		credentialType = "ecs_ram_role"
 		credentialConfig.RoleName = &c.EcsRoleName
+	} else if c.RoleArn != "" && c.OidcProviderArn != "" && c.OidcTokenFile != "" {
+		credentialType = "oidc_role_arn"
+		credentialConfig.RoleArn = &c.RoleArn
+		credentialConfig.OIDCProviderArn = &c.OidcProviderArn
+		credentialConfig.OIDCTokenFilePath = &c.OidcTokenFile
 	}
 
 	credentialConfig.Type = &credentialType

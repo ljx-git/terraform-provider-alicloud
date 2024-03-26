@@ -43,6 +43,24 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("ALICLOUD_SECRET_KEY", os.Getenv("ALIBABACLOUD_ACCESS_KEY_SECRET")),
 				Description: descriptions["secret_key"],
 			},
+			"role_arn": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABA_CLOUD_ROLE_ARN", os.Getenv("")),
+				Description: descriptions["role_arn"],
+			},
+			"oidc_provider_arn": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABA_CLOUD_OIDC_PROVIDER_ARN", os.Getenv("")),
+				Description: descriptions["oidc_provider_arn"],
+			},
+			"oidc_token_file": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABA_CLOUD_OIDC_TOKEN_FILE", os.Getenv("")),
+				Description: descriptions["oidc_token_file"],
+			},
 			"security_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -1713,8 +1731,14 @@ func providerConfigure(d *schema.ResourceData, p *schema.Provider) (interface{},
 	accessKey := getProviderConfig(d.Get("access_key").(string), "access_key_id")
 	secretKey := getProviderConfig(d.Get("secret_key").(string), "access_key_secret")
 	region := getProviderConfig(d.Get("region").(string), "region_id")
+	roleArn := getProviderConfig(d.Get("role_arn").(string), "role_arn")
+	oidcProviderArn := getProviderConfig(d.Get("oidc_provider_arn").(string), "oidc_provider_arn")
+	oidcTokenFile := getProviderConfig(d.Get("oidc_token_file").(string), "oidc_token_file")
 	if region == "" {
 		region = DEFAULT_REGION
+	}
+	if oidcTokenFile == "" {
+		oidcTokenFile = DEFAULT_OIDC_TOKEN_FILE
 	}
 	securityToken := getProviderConfig(d.Get("security_token").(string), "sts_token")
 
@@ -1736,6 +1760,9 @@ func providerConfigure(d *schema.ResourceData, p *schema.Provider) (interface{},
 		AccessKey:            strings.TrimSpace(accessKey),
 		SecretKey:            strings.TrimSpace(secretKey),
 		EcsRoleName:          strings.TrimSpace(ecsRoleName),
+		RoleArn:              strings.TrimSpace(roleArn),
+		OidcProviderArn:      strings.TrimSpace(oidcProviderArn),
+		OidcTokenFile:        strings.TrimSpace(oidcTokenFile),
 		Region:               connectivity.Region(strings.TrimSpace(region)),
 		RegionId:             strings.TrimSpace(region),
 		SkipRegionValidation: d.Get("skip_region_validation").(bool),
@@ -1958,7 +1985,7 @@ func providerConfigure(d *schema.ResourceData, p *schema.Provider) (interface{},
 			return nil, err
 		}
 	}
-	if (config.AccessKey == "" || config.SecretKey == "") && config.EcsRoleName == "" {
+	if (config.RoleArn == "" || config.OidcTokenFile == "" || config.OidcProviderArn == "") && (config.AccessKey == "" || config.SecretKey == "") && config.EcsRoleName == "" {
 		return nil, fmt.Errorf("configuring Terraform Alibaba Cloud Provider: no valid credential sources for Terraform Alibaba Cloud Provider found.\n\n%s",
 			"Please see https://registry.terraform.io/providers/aliyun/alicloud/latest/docs#authentication\n"+
 				"for more information about providing credentials.")
@@ -2028,6 +2055,10 @@ func init() {
 		"access_key": "The access key for API operations. You can retrieve this from the 'Security Management' section of the Alibaba Cloud console.",
 
 		"secret_key": "The secret key for API operations. You can retrieve this from the 'Security Management' section of the Alibaba Cloud console.",
+
+		"role_ran": "The role ran for API operations. You can retrieve this from the 'Security Management' section of the Alibaba Cloud console.",
+		
+		"oidc_provider_arn": "The oidc provider arn for API operations. You can retrieve this from the 'Security Management' section of the Alibaba Cloud console.",
 
 		"ecs_role_name": "The RAM Role Name attached on a ECS instance for API operations. You can retrieve this from the 'Access Control' section of the Alibaba Cloud console.",
 

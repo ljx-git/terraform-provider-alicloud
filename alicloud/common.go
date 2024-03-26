@@ -285,6 +285,9 @@ func isProtocolValid(value string) bool {
 // default region for all resource
 const DEFAULT_REGION = "cn-beijing"
 
+// default oidc token file for all resource
+const DEFAULT_OIDC_TOKEN_FILE = "/var/run/secrets/ack.alibabacloud.com/rrsa-tokens/token"
+
 const INT_MAX = 2147483647
 
 // symbol of multiIZ
