@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 
-	cs "github.com/alibabacloud-go/cs-20151215/v3/client"
+	cs "github.com/alibabacloud-go/cs-20151215/v5/client"
 )
 
 func TestAccAlicloudCSAutoscalingConfig_basic(t *testing.T) {

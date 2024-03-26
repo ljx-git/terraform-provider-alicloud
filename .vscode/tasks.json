@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // 构建二进制
+      "type": "go",
+      "label": "go_build",
+      "command": "build",
+      "args": [
+        "-ldflags=-w -s",
+        "-o",
+        "${workspaceFolder}/${config:provider-alicloud}",
+        "${workspaceFolder}"
+      ],
+      // 指定先执行删除任务
+      "dependsOn": [
+        "clean_bin"
+      ]
+    },
+    {
+      // 删除已存在的二进制
+      "type": "shell",
+      "label": "clean_bin",
+      "command": "rm",
+      "args": [
+        "-f",
+        "${workspaceFolder}/${config:provider-alicloud}"
+      ]
+    }
+  ]
+}
