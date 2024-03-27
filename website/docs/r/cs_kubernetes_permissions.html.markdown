@@ -24,7 +24,7 @@ For more information about how to authorize a RAM user by attaching RAM policies
 
 ```terraform
 variable "name" {
-	default = "tf-example"
+	default = "terraform-example"
 }
 
 variable "vpc_cidr" {
@@ -51,7 +51,7 @@ variable "service_cidr" {
 data "alicloud_enhanced_nat_available_zones" "enhanced" {}
 
 data "alicloud_cs_kubernetes_version" "default" {
-  cluster_type       = "ManagedKubernetes"
+  cluster_type = "ManagedKubernetes"
 }
 
 resource "alicloud_vpc" "vpc" {
@@ -68,19 +68,19 @@ resource "alicloud_vswitch" "default" {
 
 # Create a new RAM cluster.
 resource "alicloud_cs_managed_kubernetes" "default" {
-  name                 = var.name
+  name                 = join("-", [var.name, replace(timestamp(), ":", "-")])
   cluster_spec         = "ack.pro.small"
   version              = data.alicloud_cs_kubernetes_version.default.metadata.0.version
   worker_vswitch_ids   = split(",", join(",", alicloud_vswitch.default.*.id))
   new_nat_gateway      = false
   pod_cidr             = var.pod_cidr
   service_cidr         = var.service_cidr
-	slb_internet_enabled = false
+  slb_internet_enabled = false
 }
 
 # Create a new RAM user.
 resource "alicloud_ram_user" "user" {
-  name         = var.name
+  name         = join("-", [var.name, replace(timestamp(), ":", "-")])
 }
 
 # Create a cluster permission for user.
